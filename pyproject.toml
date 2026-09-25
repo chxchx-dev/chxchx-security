@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "chxchx-security"
+version = "0.1.0"
+description = "Fedora-focused privacy orchestration CLI using system Tor, torsocks and NetworkManager."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "ChxChx Security" }]
+dependencies = [
+  "rich>=13.9,<15"
+]
+keywords = ["privacy", "fedora", "tor", "networkmanager", "cli"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3",
+  "Topic :: Security",
+]
+
+[project.scripts]
+chxsec = "chxchx_security.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/chxchx_security"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+addopts = "-q"

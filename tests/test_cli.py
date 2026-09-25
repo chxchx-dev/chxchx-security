@@ -1,0 +1,41 @@
+import json
+
+from chxchx_security import cli
+from chxchx_security.services.audit import Check
+from chxchx_security.services.tor import TorVerification
+
+
+def test_doctor_json_output(monkeypatch, capsys):
+    monkeypatch.setattr(
+        cli,
+        "doctor",
+        lambda _settings: [Check("Tor", True, "active"), Check("SOCKS", False, "down")],
+    )
+
+    exit_code = cli.main(["doctor", "--json"])
+    payload = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 1
+    assert payload["ok"] is False
+    assert payload["checks"][0] == {"name": "Tor", "ok": True, "detail": "active"}
+
+
+def test_verify_json_masks_ip_by_default(monkeypatch, capsys):
+    monkeypatch.setattr(
+        cli,
+        "verify",
+        lambda _settings, reveal_ip=False: TorVerification(
+            True, True, "203.0.x.x" if not reveal_ip else "203.0.113.42", "Tor path verified"
+        ),
+    )
+
+    exit_code = cli.main(["tor", "verify", "--json"])
+    payload = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 0
+    assert payload == {
+        "detail": "Tor path verified",
+        "ip": "203.0.x.x",
+        "is_tor": True,
+        "ok": True,
+    }
