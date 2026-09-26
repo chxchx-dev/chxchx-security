@@ -48,7 +48,7 @@ jobs:
       - name: Reject common secret patterns
         shell: bash
         run: |
-          if git grep -nE '(BEGIN .*PRIVATE KEY|password[[:space:]]*=|token[[:space:]]*=|api[_-]?key[[:space:]]*=)' -- .; then
+          if git grep -nE '(BEGIN .*PRIVATE KEY|password[[:space:]]*=|token[[:space:]]*=|api[_-]?key[[:space:]]*=)' -- . ':(exclude).github/workflows/ci.yml'; then
             echo 'Potential secret pattern found in tracked files.' >&2
             exit 1
           fi
