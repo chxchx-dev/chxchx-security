@@ -2,6 +2,7 @@ import json
 
 from chxchx_security import cli
 from chxchx_security.services.audit import Check
+from chxchx_security.services.network import ConnectionInfo
 from chxchx_security.services.tor import TorVerification
 
 
@@ -35,7 +36,22 @@ def test_verify_json_masks_ip_by_default(monkeypatch, capsys):
     assert exit_code == 0
     assert payload == {
         "detail": "Tor path verified",
+        "error": None,
         "ip": "203.0.x.x",
         "is_tor": True,
         "ok": True,
     }
+
+
+def test_mac_list_hides_connection_name_by_default(monkeypatch, capsys):
+    monkeypatch.setattr(
+        cli,
+        "active_connections",
+        lambda: [ConnectionInfo("Private WiFi", "802-11-wireless")],
+    )
+
+    assert cli.main(["mac", "list"]) == 0
+    output = capsys.readouterr().out
+
+    assert "Private WiFi" not in output
+    assert "Wi-Fi connection" in output

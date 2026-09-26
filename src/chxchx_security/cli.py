@@ -9,7 +9,12 @@ from rich.prompt import Prompt
 from chxchx_security import __version__
 from chxchx_security.config import ConfigurationError, Settings
 from chxchx_security.services.audit import doctor
-from chxchx_security.services.network import ALLOWED_MAC_MODES, active_connections, apply_mac_mode
+from chxchx_security.services.network import (
+    ALLOWED_MAC_MODES,
+    active_connections,
+    apply_mac_mode,
+    connection_label,
+)
 from chxchx_security.services.tor import (
     protected_shell,
     run_protected,
@@ -45,7 +50,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     mac = sub.add_parser("mac", help="NetworkManager MAC privacy")
     mac_sub = mac.add_subparsers(dest="mac_command", required=True)
-    mac_sub.add_parser("list")
+    mac_list = mac_sub.add_parser("list")
+    mac_list.add_argument(
+        "--reveal-identifiers",
+        action="store_true",
+        help="Show local connection names and types",
+    )
     mac_apply = mac_sub.add_parser("apply")
     mac_apply.add_argument("connection")
     mac_apply.add_argument("mode", choices=sorted(ALLOWED_MAC_MODES))
@@ -76,6 +86,7 @@ def _verification_json(result) -> str:
             "is_tor": result.is_tor,
             "ip": result.ip,
             "detail": result.detail,
+            "error": result.error_code,
         },
         ensure_ascii=False,
         sort_keys=True,
@@ -112,7 +123,7 @@ def _interactive(settings: Settings) -> int:
         return protected_shell(settings)
     if choice == "5":
         for item in active_connections():
-            console.print(f"- {item.name} ({item.kind})")
+            console.print(f"- {connection_label(item)}")
         return 0
     return 0
 
@@ -176,7 +187,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "mac":
         if args.mac_command == "list":
             for item in active_connections():
-                console.print(f"- {item.name} ({item.kind})")
+                console.print(
+                    f"- {connection_label(item, reveal_identifiers=args.reveal_identifiers)}"
+                )
             return 0
         if args.mac_command == "apply":
             result = apply_mac_mode(args.connection, args.mode, reconnect=args.reconnect)

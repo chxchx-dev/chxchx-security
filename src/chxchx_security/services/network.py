@@ -13,6 +13,22 @@ class ConnectionInfo:
     kind: str
 
 
+def connection_label(connection: ConnectionInfo, *, reveal_identifiers: bool = False) -> str:
+    """Return a safe display label without exposing local connection names by default."""
+    if reveal_identifiers:
+        return f"{connection.name} ({connection.kind})"
+    labels = {
+        "802-11-wireless": "Wi-Fi connection",
+        "wifi": "Wi-Fi connection",
+        "802-3-ethernet": "Ethernet connection",
+        "ethernet": "Ethernet connection",
+        "tun": "Tunnel interface",
+        "bridge": "Bridge interface",
+        "loopback": "Loopback interface",
+    }
+    return labels.get(connection.kind, "Network connection")
+
+
 def active_connections() -> list[ConnectionInfo]:
     if not exists("nmcli"):
         return []
