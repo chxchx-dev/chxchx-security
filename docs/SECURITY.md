@@ -19,6 +19,10 @@ Protected shell history is not written to a shell history file by this tool, and
 
 The project intentionally does not delete journals, audit records or system logs.
 
+`mac list` uses generic connection labels by default so SSIDs and local interface names are not
+printed accidentally. Use `--reveal-identifiers` only when operating on a local terminal and do not
+copy that output into public issues or documentation.
+
 ## Update policy
 
 Do not vendor Tor. Keep Fedora and Tor packages patched. Security fixes in Tor or NetworkManager matter more than clever wrapper code.

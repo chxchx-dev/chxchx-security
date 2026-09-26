@@ -5,6 +5,7 @@ import os
 import socket
 import subprocess
 import tempfile
+import time
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -19,6 +20,11 @@ class TorVerification:
     is_tor: bool
     ip: str | None
     detail: str
+    error_code: str | None = None
+
+
+VERIFY_ATTEMPTS = 3
+VERIFY_RETRY_DELAY_SECONDS = 0.5
 
 
 def socks_reachable(settings: Settings) -> bool:
@@ -46,34 +52,59 @@ def start_service() -> CmdResult:
 
 def verify(settings: Settings, *, reveal_ip: bool = False) -> TorVerification:
     if not exists("curl"):
-        return TorVerification(False, False, None, "curl is required")
+        return TorVerification(False, False, None, "curl is required", "missing_dependency")
     if not socks_reachable(settings):
-        return TorVerification(False, False, None, "Tor SOCKS port is not reachable")
+        return TorVerification(
+            False,
+            False,
+            None,
+            "Tor SOCKS port is not reachable",
+            "socks_unreachable",
+        )
 
     proxy = f"{settings.tor_socks_host}:{settings.tor_socks_port}"
-    result = run(
-        [
-            "curl",
-            "--fail",
-            "--silent",
-            "--show-error",
-            "--max-time",
-            str(settings.http_timeout_seconds),
-            "--socks5-hostname",
-            proxy,
-            settings.tor_check_url,
-        ],
-        timeout=settings.http_timeout_seconds + 3,
-    )
+    argv = [
+        "curl",
+        "--fail",
+        "--silent",
+        "--show-error",
+        "--max-time",
+        str(settings.http_timeout_seconds),
+        "--socks5-hostname",
+        proxy,
+        settings.tor_check_url,
+    ]
+    result = None
+    for attempt in range(1, VERIFY_ATTEMPTS + 1):
+        result = run(argv, timeout=settings.http_timeout_seconds + 3)
+        if result.ok:
+            break
+        if attempt < VERIFY_ATTEMPTS:
+            time.sleep(VERIFY_RETRY_DELAY_SECONDS)
+
+    assert result is not None
     if not result.ok:
-        return TorVerification(False, False, None, result.stderr or "Tor check failed")
+        error_code = "timeout" if result.returncode == 124 else "check_request_failed"
+        detail = (
+            "Tor check timed out"
+            if error_code == "timeout"
+            else f"Tor check request failed after {VERIFY_ATTEMPTS} attempts"
+        )
+        return TorVerification(False, False, None, detail, error_code)
 
     try:
         payload = json.loads(result.stdout)
     except json.JSONDecodeError:
-        return TorVerification(False, False, None, "Tor check returned invalid JSON")
+        return TorVerification(
+            False, False, None, "Tor check returned invalid JSON", "invalid_response"
+        )
 
-    is_tor = bool(payload.get("IsTor"))
+    if not isinstance(payload, dict):
+        return TorVerification(
+            False, False, None, "Tor check returned an invalid response", "invalid_response"
+        )
+
+    is_tor = payload.get("IsTor") is True
     raw_ip = payload.get("IP") if isinstance(payload.get("IP"), str) else None
     shown_ip = raw_ip if reveal_ip else (mask_ip(raw_ip) if raw_ip else None)
     return TorVerification(
@@ -81,6 +112,7 @@ def verify(settings: Settings, *, reveal_ip: bool = False) -> TorVerification:
         is_tor=is_tor,
         ip=shown_ip,
         detail="Tor path verified" if is_tor else "Endpoint did not confirm Tor",
+        error_code=None if is_tor else "not_tor",
     )
 
 

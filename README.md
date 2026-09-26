@@ -11,7 +11,7 @@ Terminal-first privacy orchestrator for Fedora. It does **not** claim to make a 
 - `tor verify --json` emits the verification result while masking the exit IP by default.
 - `run -- <command>` executes a compatible program through `torsocks --isolate`.
 - `shell` starts an ephemeral protected shell with `torsocks`, restrictive umask, no shell-history file, and a temporary runtime directory. It **does not erase system logs**.
-- `mac list/apply` manages NetworkManager's supported cloned-MAC modes (`random`, `stable`, `stable-ssid`, `preserve`, `permanent`).
+- `mac list/apply` manages NetworkManager's supported cloned-MAC modes (`random`, `stable`, `stable-ssid`, `preserve`, `permanent`); connection identifiers are hidden by default.
 - Optional local `.env` configuration; dotenv files and local runtime files are ignored by Git.
 - No custom cryptography and no custom proxy implementation.
 
@@ -24,17 +24,21 @@ For web anonymity, use Tor Browser rather than assuming a normal browser becomes
 ## Fedora install
 
 ```bash
-./install-fedora.sh
-python3 -m venv .venv
+./install-fedora.sh --yes
 source .venv/bin/activate
-pip install -e .
 chxsec doctor
-chxsec tor start
 chxsec tor verify
 chxsec
 ```
 
-`install-fedora.sh` installs Fedora packages only after showing what it will install. Tor itself is provided by Fedora/Tor packages; this project does not vendor Tor.
+`install-fedora.sh` installs Fedora packages, creates `.venv` and installs the project. Tor itself is provided by Fedora/Tor packages; this project does not vendor Tor. The installer does not start or enable Tor unless explicitly requested:
+
+```bash
+./install-fedora.sh --yes --start-tor
+./install-fedora.sh --yes --enable-tor
+```
+
+Use `./install-fedora.sh --help` to see all options. Use `--dry-run` to inspect the planned actions without changing the system.
 
 Configuration is optional. The built-in defaults work without a config file; local overrides may be
 placed in `.env` or exported as `CHXSEC_*` environment variables. Never commit dotenv files.
@@ -50,6 +54,7 @@ chxsec tor verify --json
 chxsec run -- curl https://example.com
 chxsec shell
 chxsec mac list
+chxsec mac list --reveal-identifiers
 chxsec mac apply "My WiFi" random
 ```
 
@@ -61,6 +66,7 @@ Applying a MAC policy modifies the selected NetworkManager connection profile. A
 - No username/hostname collection.
 - No persistent storage of detected public IPs.
 - Tor verification masks IP output unless `--reveal-ip` is explicitly supplied.
+- `mac list` hides SSIDs and local interface names unless `--reveal-identifiers` is explicitly supplied.
 - Direct-IP checks are disabled by default.
 - Commands that modify system networking are explicit and use existing system tools.
 
