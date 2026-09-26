@@ -7,6 +7,10 @@
 *.pfx
 secrets/
 
+# Internal planning and security review material
+MASTER_ROADMAP.md
+docs/
+
 # Python
 __pycache__/
 *.py[cod]

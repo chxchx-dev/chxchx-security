@@ -73,6 +73,18 @@ Applying a MAC policy modifies the selected NetworkManager connection profile. A
 JSON commands return exit code `0` only when all requested checks succeed; failed readiness or
 verification returns exit code `1`.
 
-## Project docs
+## Security guarantees and limits
 
-Read `docs/ORCHESTRATION.md`, `docs/ARCHITECTURE.md`, `docs/THREAT_MODEL.md`, `docs/RULES.md`, `docs/PHASES.md`, `docs/SECURITY.md` and `docs/ROADMAP.md` before extending the project.
+- Protected execution refuses to run when the Tor SOCKS listener is unavailable; there is no direct-network fallback.
+- Tor verification resolves the check hostname through SOCKS and requires the endpoint to confirm `IsTor`.
+- The project reduces exposure for explicitly protected compatible TCP processes; it is not a whole-host anonymity system.
+- The project does not erase system logs, audit records or third-party history.
+- Do not publish terminal screenshots or logs containing SSIDs, usernames, hostnames, home paths, IPs or interface names.
+
+## Development
+
+```bash
+./install-fedora.sh --yes --with-dev
+source .venv/bin/activate
+pytest
+```
