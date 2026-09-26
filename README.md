@@ -98,3 +98,9 @@ external network access:
 ```bash
 make integration
 ```
+
+The namespace lifecycle smoke test is separate because it uses privileged `ip netns` commands:
+
+```bash
+make namespace-integration
+```

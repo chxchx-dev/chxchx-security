@@ -4,6 +4,7 @@
 
 - Added the validated protected-session lifecycle contract for the upcoming namespace implementation.
 - Added namespace prerequisite detection and a non-executing session plan.
+- Added a tested namespace create/destroy adapter with loopback setup and rollback.
 
 ## 0.1.2 - 2026-09-26
 

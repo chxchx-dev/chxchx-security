@@ -89,6 +89,7 @@ def build_namespace_plan(session_id: str) -> NamespacePlan:
                 ("sudo", "ip", "netns", "add", namespace),
                 "planned",
             ),
+            NamespaceStep("enable loopback", None, "planned"),
             NamespaceStep("attach isolated network", None, "not_implemented"),
             NamespaceStep("route DNS and TCP through Tor", None, "not_implemented"),
             NamespaceStep("install namespace-scoped nftables", None, "not_implemented"),

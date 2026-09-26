@@ -1,4 +1,4 @@
-.PHONY: venv install test check integration doctor clean
+.PHONY: venv install test check integration namespace-integration doctor clean
 
 venv:
 	python3 -m venv .venv
@@ -14,6 +14,9 @@ check: test
 
 integration:
 	CHXSEC_RUN_LIVE_TESTS=1 .venv/bin/pytest tests/integration
+
+namespace-integration:
+	CHXSEC_RUN_NAMESPACE_TESTS=1 .venv/bin/pytest tests/integration/test_live_namespace.py
 
 doctor:
 	.venv/bin/chxsec doctor
