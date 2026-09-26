@@ -1,8 +1,8 @@
-# ChxChx Security v0.1.0
+# ChxChx Security v0.1.1
 
 Terminal-first privacy orchestrator for Fedora. It does **not** claim to make a machine invisible or erase forensic evidence. Its purpose is narrower and testable: launch compatible applications through Tor, validate the Tor path, reduce accidental local metadata, and manage NetworkManager MAC privacy settings without putting secrets or machine-specific data in Git.
 
-## What v0.1.0 does
+## What v0.1.1 does
 
 - Rich terminal UI inspired by mobile terminal workflows.
 - `doctor` checks required Fedora/Linux components without printing username, hostname, serials or permanent MAC addresses.

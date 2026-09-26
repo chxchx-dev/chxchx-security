@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.1 - 2026-09-26
 
 - Added JSON output for `doctor` and `tor verify`.
 - Added validation for numeric environment settings.
@@ -10,6 +10,8 @@
 - Added system-clock readiness checks, retryable Tor verification and classified verification errors.
 - Hid local NetworkManager connection identifiers from `mac list` by default.
 - Expanded the Fedora installer to prepare the virtual environment and support explicit Tor service actions.
+- Fixed interactive `doctor` exit codes and added JSON support to the `audit` alias.
+- Added a standard `make check` validation target and continuous integration configuration.
 
 ## 0.1.0 - 2026-09-25
 

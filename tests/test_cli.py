@@ -21,6 +21,23 @@ def test_doctor_json_output(monkeypatch, capsys):
     assert payload["checks"][0] == {"name": "Tor", "ok": True, "detail": "active"}
 
 
+def test_audit_alias_supports_json(monkeypatch, capsys):
+    monkeypatch.setattr(cli, "doctor", lambda _settings: [Check("Tor", True, "active")])
+
+    exit_code = cli.main(["audit", "--json"])
+    payload = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 0
+    assert payload["ok"] is True
+
+
+def test_interactive_doctor_returns_failure_status(monkeypatch):
+    monkeypatch.setattr(cli.Prompt, "ask", lambda *_args, **_kwargs: "1")
+    monkeypatch.setattr(cli, "doctor", lambda _settings: [Check("Tor", False, "down")])
+
+    assert cli.main([]) == 1
+
+
 def test_verify_json_masks_ip_by_default(monkeypatch, capsys):
     monkeypatch.setattr(
         cli,

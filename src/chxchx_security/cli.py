@@ -33,7 +33,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     doctor_p = sub.add_parser("doctor", help="Check local privacy prerequisites")
     doctor_p.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
-    sub.add_parser("audit", help="Alias of doctor for v0.1.0")
+    audit_p = sub.add_parser("audit", help="Alias of doctor")
+    audit_p.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
 
     tor = sub.add_parser("tor", help="Tor service and route checks")
     tor_sub = tor.add_subparsers(dest="tor_command", required=True)
@@ -79,6 +80,10 @@ def _checks_json(checks) -> str:
     )
 
 
+def _checks_ok(checks) -> bool:
+    return all(check.ok for check in checks)
+
+
 def _verification_json(result) -> str:
     return json.dumps(
         {
@@ -105,8 +110,9 @@ def _interactive(settings: Settings) -> int:
     if choice == "0":
         return 0
     if choice == "1":
-        checks_table(doctor(settings))
-        return 0
+        checks = doctor(settings)
+        checks_table(checks)
+        return 0 if _checks_ok(checks) else 1
     if choice == "2":
         result = start_service()
         console.print("[green]Tor started[/]" if result.ok else f"[red]{result.stderr or result.stdout}[/]")
@@ -147,7 +153,7 @@ def main(argv: list[str] | None = None) -> int:
         else:
             header(__version__)
             checks_table(checks)
-        return 0 if all(check.ok for check in checks) else 1
+        return 0 if _checks_ok(checks) else 1
 
     if args.command == "tor":
         if args.tor_command == "status":
@@ -204,7 +210,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "about":
         console.print(
             "ChxChx Security reduces accidental network exposure for explicitly protected processes. "
-            "It does not provide invisibility, anti-forensics, or whole-host anonymity in v0.1.0."
+            f"It does not provide invisibility, anti-forensics, or whole-host anonymity in {__version__}."
         )
         return 0
 
