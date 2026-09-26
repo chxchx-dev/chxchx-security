@@ -20,6 +20,7 @@ from chxchx_security.services.namespace import (
     detect_namespace_tools,
 )
 from chxchx_security.services.network_plan import build_network_plan
+from chxchx_security.services.tor_ports import build_tor_port_plan
 from chxchx_security.services.tor import (
     protected_shell,
     run_protected,
@@ -67,6 +68,13 @@ def build_parser() -> argparse.ArgumentParser:
     network_plan.add_argument("--trans-port", type=int, default=9040)
     network_plan.add_argument("--dns-port", type=int, default=5353)
     network_plan.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
+    tor_port_plan = session_sub.add_parser(
+        "tor-port-plan", help="Show a non-executing Tor listener configuration"
+    )
+    tor_port_plan.add_argument("bind_address", nargs="?", default="10.203.0.1")
+    tor_port_plan.add_argument("--trans-port", type=int, default=9040)
+    tor_port_plan.add_argument("--dns-port", type=int, default=5353)
+    tor_port_plan.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
 
     mac = sub.add_parser("mac", help="NetworkManager MAC privacy")
     mac_sub = mac.add_subparsers(dest="mac_command", required=True)
@@ -260,6 +268,25 @@ def main(argv: list[str] | None = None) -> int:
                 for step in plan.steps:
                     command = " ".join(step.command) if step.command else "pending"
                     console.print(f"- [{step.status}] {step.name}: {command}")
+            return 0
+        if args.session_command == "tor-port-plan":
+            try:
+                plan = build_tor_port_plan(
+                    args.bind_address,
+                    trans_port=args.trans_port,
+                    dns_port=args.dns_port,
+                )
+            except ValueError as exc:
+                console.print(f"[red]{exc}[/]")
+                return 2
+            if args.json:
+                print(json.dumps(plan.as_dict(), ensure_ascii=False, sort_keys=True))
+            else:
+                console.print(f"bind_address={plan.bind_address}")
+                console.print(f"executable={'yes' if plan.executable else 'no'}")
+                console.print(f"status={plan.reason}")
+                for directive in plan.directives:
+                    console.print(f"- {directive}")
             return 0
 
     if args.command == "mac":

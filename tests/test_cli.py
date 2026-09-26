@@ -88,3 +88,14 @@ def test_session_network_plan_is_explicitly_non_executing(capsys):
 
     assert payload["subnet"] == "10.203.0.0/30"
     assert payload["executable"] is False
+
+
+def test_session_tor_port_plan_is_explicitly_non_executing(capsys):
+    assert cli.main(["session", "tor-port-plan", "10.203.0.1", "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+
+    assert payload["directives"] == [
+        "TransPort 10.203.0.1:9040",
+        "DNSPort 10.203.0.1:5353",
+    ]
+    assert payload["executable"] is False
