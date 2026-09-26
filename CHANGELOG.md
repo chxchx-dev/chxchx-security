@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Added the validated protected-session lifecycle contract for the upcoming namespace implementation.
+
 ## 0.1.2 - 2026-09-26
 
 - Protected commands now require a verified Tor route before launching.
