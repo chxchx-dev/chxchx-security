@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2 - 2026-09-26
+
+- Protected commands now require a verified Tor route before launching.
+- Added opt-in live integration tests for a real Fedora/Tor environment.
+
 ## 0.1.1 - 2026-09-26
 
 - Added JSON output for `doctor` and `tor verify`.

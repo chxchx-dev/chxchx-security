@@ -116,6 +116,14 @@ def verify(settings: Settings, *, reveal_ip: bool = False) -> TorVerification:
     )
 
 
+def require_verified_route(settings: Settings) -> None:
+    """Refuse protected execution unless the configured route is confirmed as Tor."""
+    result = verify(settings)
+    if not result.ok:
+        code = f" [{result.error_code}]" if result.error_code else ""
+        raise RuntimeError(f"Tor route is not verified{code}: {result.detail}")
+
+
 def protected_argv(settings: Settings, command: list[str]) -> list[str]:
     if not command:
         raise ValueError("No command supplied")
@@ -133,8 +141,7 @@ def protected_argv(settings: Settings, command: list[str]) -> list[str]:
 def run_protected(settings: Settings, command: list[str]) -> int:
     if not exists("torsocks"):
         raise RuntimeError("torsocks is not installed")
-    if not socks_reachable(settings):
-        raise RuntimeError("Tor SOCKS port is not reachable; refusing direct fallback")
+    require_verified_route(settings)
     argv = protected_argv(settings, command)
     return subprocess.call(argv)
 
@@ -142,8 +149,7 @@ def run_protected(settings: Settings, command: list[str]) -> int:
 def protected_shell(settings: Settings) -> int:
     if not exists("torsocks"):
         raise RuntimeError("torsocks is not installed")
-    if not socks_reachable(settings):
-        raise RuntimeError("Tor SOCKS port is not reachable; refusing direct fallback")
+    require_verified_route(settings)
 
     runtime_parent = Path(os.getenv("XDG_RUNTIME_DIR", "/dev/shm"))
     runtime_parent.mkdir(parents=True, exist_ok=True)

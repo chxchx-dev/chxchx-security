@@ -58,3 +58,21 @@ def test_verify_classifies_timeout(monkeypatch):
 
     assert result.ok is False
     assert result.error_code == "timeout"
+
+
+def test_protected_run_requires_verified_route(monkeypatch):
+    monkeypatch.setattr(tor, "exists", lambda command: command == "torsocks")
+    monkeypatch.setattr(
+        tor,
+        "verify",
+        lambda _settings: tor.TorVerification(
+            False, False, None, "Endpoint did not confirm Tor", "not_tor"
+        ),
+    )
+
+    try:
+        tor.run_protected(settings(), ["true"])
+    except RuntimeError as exc:
+        assert "not_tor" in str(exc)
+    else:
+        raise AssertionError("protected execution must refuse an unverified route")
