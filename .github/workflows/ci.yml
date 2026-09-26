@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.13"]
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install project and test dependencies
+        run: python -m pip install --upgrade pip && python -m pip install -e . pytest
+
+      - name: Run tests
+        run: python -m pytest
+
+      - name: Validate installer syntax
+        run: bash -n install-fedora.sh
+
+      - name: Compile Python sources
+        run: python -m compileall -q src
+
+  public-scan:
+    name: Public tree scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Reject common secret patterns
+        shell: bash
+        run: |
+          if git grep -nE '(BEGIN .*PRIVATE KEY|password[[:space:]]*=|token[[:space:]]*=|api[_-]?key[[:space:]]*=)' -- . ':(exclude).github/workflows/ci.yml'; then
+            echo 'Potential secret pattern found in tracked files.' >&2
+            exit 1
+          fi

@@ -1,4 +1,4 @@
-.PHONY: venv install test doctor clean
+.PHONY: venv install test check integration doctor clean
 
 venv:
 	python3 -m venv .venv
@@ -8,6 +8,12 @@ install:
 
 test:
 	.venv/bin/pytest
+
+check: test
+	bash -n install-fedora.sh
+
+integration:
+	CHXSEC_RUN_LIVE_TESTS=1 .venv/bin/pytest tests/integration
 
 doctor:
 	.venv/bin/chxsec doctor

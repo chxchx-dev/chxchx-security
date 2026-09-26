@@ -1,5 +1,6 @@
 from chxchx_security.config import Settings
 from chxchx_security.services import audit
+from chxchx_security.utils.process import CmdResult
 
 
 def settings():
@@ -19,6 +20,7 @@ def test_doctor_reports_required_dependencies(monkeypatch):
     monkeypatch.setattr(audit, "exists", lambda command: command != "firewall-cmd")
     monkeypatch.setattr(audit, "service_state", lambda: "active")
     monkeypatch.setattr(audit, "socks_reachable", lambda _settings: True)
+    monkeypatch.setattr(audit, "run", lambda *_args, **_kwargs: CmdResult(True, 0, "yes", ""))
 
     checks = audit.doctor(settings())
 
@@ -32,4 +34,5 @@ def test_doctor_reports_required_dependencies(monkeypatch):
         "NetworkManager CLI",
         "Tor service",
         "Tor SOCKS",
+        "System clock",
     }
