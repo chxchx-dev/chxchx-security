@@ -80,3 +80,11 @@ def test_session_plan_is_explicitly_non_executing(capsys):
 
     assert payload["namespace"] == "chxsec-demo"
     assert payload["executable"] is False
+
+
+def test_session_network_plan_is_explicitly_non_executing(capsys):
+    assert cli.main(["session", "network-plan", "demo", "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+
+    assert payload["subnet"] == "10.203.0.0/30"
+    assert payload["executable"] is False
