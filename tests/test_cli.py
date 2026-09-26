@@ -72,3 +72,11 @@ def test_mac_list_hides_connection_name_by_default(monkeypatch, capsys):
 
     assert "Private WiFi" not in output
     assert "Wi-Fi connection" in output
+
+
+def test_session_plan_is_explicitly_non_executing(capsys):
+    assert cli.main(["session", "plan", "demo", "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+
+    assert payload["namespace"] == "chxsec-demo"
+    assert payload["executable"] is False

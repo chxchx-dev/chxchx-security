@@ -56,6 +56,8 @@ chxsec shell
 chxsec mac list
 chxsec mac list --reveal-identifiers
 chxsec mac apply "My WiFi" random
+chxsec session tools
+chxsec session plan demo
 ```
 
 Applying a MAC policy modifies the selected NetworkManager connection profile. Add `--reconnect` only when you are prepared for the connection to drop and reconnect.
@@ -79,6 +81,7 @@ verification returns exit code `1`.
 - Tor verification resolves the check hostname through SOCKS and requires the endpoint to confirm `IsTor`.
 - The project reduces exposure for explicitly protected compatible TCP processes; it is not a whole-host anonymity system.
 - The project does not erase system logs, audit records or third-party history.
+- `session plan` is currently dry-run only; it never creates namespaces or changes firewall rules.
 - Do not publish terminal screenshots or logs containing SSIDs, usernames, hostnames, home paths, IPs or interface names.
 
 ## Development

@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Added the validated protected-session lifecycle contract for the upcoming namespace implementation.
+- Added namespace prerequisite detection and a non-executing session plan.
 
 ## 0.1.2 - 2026-09-26
 
