@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- Added the validated protected-session lifecycle contract for the upcoming namespace implementation.
+- Added namespace prerequisite detection and a non-executing session plan.
+- Added a tested namespace create/destroy adapter with loopback setup and rollback.
+- Added a validated veth/Tor-port network plan without privileged execution.
+- Added a validated, non-executing private Tor `TransPort`/`DNSPort` configuration plan.
+- Added a validated, non-executing fail-closed `nftables` ruleset plan.
+
 ## 0.1.2 - 2026-09-26
 
 - Protected commands now require a verified Tor route before launching.

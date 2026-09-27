@@ -72,3 +72,40 @@ def test_mac_list_hides_connection_name_by_default(monkeypatch, capsys):
 
     assert "Private WiFi" not in output
     assert "Wi-Fi connection" in output
+
+
+def test_session_plan_is_explicitly_non_executing(capsys):
+    assert cli.main(["session", "plan", "demo", "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+
+    assert payload["namespace"] == "chxsec-demo"
+    assert payload["executable"] is False
+
+
+def test_session_network_plan_is_explicitly_non_executing(capsys):
+    assert cli.main(["session", "network-plan", "demo", "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+
+    assert payload["subnet"] == "10.203.0.0/30"
+    assert payload["executable"] is False
+
+
+def test_session_tor_port_plan_is_explicitly_non_executing(capsys):
+    assert cli.main(["session", "tor-port-plan", "10.203.0.1", "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+
+    assert payload["directives"] == [
+        "TransPort 10.203.0.1:9040",
+        "DNSPort 10.203.0.1:5353",
+    ]
+    assert payload["executable"] is False
+
+
+def test_session_firewall_plan_is_explicitly_non_executing(capsys):
+    assert cli.main(["session", "firewall-plan", "demo", "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+
+    assert payload["filter_table"] == "chxsec_2a97516c"
+    assert payload["nat_table"] == "chxsec_nat_2a97516c"
+    assert payload["executable"] is False
+    assert "policy drop" in payload["ruleset"]
