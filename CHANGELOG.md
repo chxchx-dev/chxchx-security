@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Added `session firewall-apply` (dry-run unless `--yes`): validates and atomically installs the session's nftables tables; `session destroy` now removes them too.
+- Fixed the planned firewall ruleset: invalid `tcp redirect` syntax, host-wide `forward policy drop` (now scoped to the session interface), IPv6 not dropped from the session interface, and unreachable TCP-DNS rules.
+- Added `session network-apply` (dry-run unless `--yes`) to create a namespace and wire a veth pair with rollback, and `session destroy` to remove it.
+- Compact ASCII banner shown on interactive start and `doctor`; short signature shown by `about`.
 - Added the validated protected-session lifecycle contract for the upcoming namespace implementation.
 - Added namespace prerequisite detection and a non-executing session plan.
 - Added a tested namespace create/destroy adapter with loopback setup and rollback.
