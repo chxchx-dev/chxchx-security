@@ -39,3 +39,8 @@ coverage.xml
 system-info*.txt
 network-info*.txt
 debug-dump*.txt
+
+# Local AI tooling
+.ai/
+.codex/
+.serena/
