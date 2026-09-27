@@ -108,7 +108,8 @@ def test_session_firewall_plan_is_explicitly_non_executing(capsys):
     assert payload["filter_table"] == "chxsec_2a97516c"
     assert payload["nat_table"] == "chxsec_nat_2a97516c"
     assert payload["executable"] is False
-    assert "policy drop" in payload["ruleset"]
+    assert "policy drop" not in payload["ruleset"]
+    assert 'iifname "chxh-2a97516c" drop' in payload["ruleset"]
 
 
 def test_session_network_apply_without_yes_is_dry_run(capsys):
@@ -121,3 +122,12 @@ def test_session_network_apply_without_yes_is_dry_run(capsys):
 
 def test_session_network_apply_rejects_bad_session_id(capsys):
     assert cli.main(["session", "network-apply", "Bad_ID"]) == 2
+
+
+def test_session_firewall_apply_without_yes_is_dry_run(capsys):
+    assert cli.main(["session", "firewall-apply", "demo", "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+
+    assert payload["applied"] is False
+    assert "policy drop" not in payload["ruleset"]
+    assert payload["commands"][0][-3:] == ["table", "inet", "chxsec_2a97516c"]
