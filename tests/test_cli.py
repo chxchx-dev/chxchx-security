@@ -99,3 +99,13 @@ def test_session_tor_port_plan_is_explicitly_non_executing(capsys):
         "DNSPort 10.203.0.1:5353",
     ]
     assert payload["executable"] is False
+
+
+def test_session_firewall_plan_is_explicitly_non_executing(capsys):
+    assert cli.main(["session", "firewall-plan", "demo", "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+
+    assert payload["filter_table"] == "chxsec_2a97516c"
+    assert payload["nat_table"] == "chxsec_nat_2a97516c"
+    assert payload["executable"] is False
+    assert "policy drop" in payload["ruleset"]

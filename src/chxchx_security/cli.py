@@ -20,6 +20,7 @@ from chxchx_security.services.namespace import (
     detect_namespace_tools,
 )
 from chxchx_security.services.network_plan import build_network_plan
+from chxchx_security.services.firewall_plan import build_firewall_plan
 from chxchx_security.services.tor_ports import build_tor_port_plan
 from chxchx_security.services.tor import (
     protected_shell,
@@ -75,6 +76,14 @@ def build_parser() -> argparse.ArgumentParser:
     tor_port_plan.add_argument("--trans-port", type=int, default=9040)
     tor_port_plan.add_argument("--dns-port", type=int, default=5353)
     tor_port_plan.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
+    firewall_plan = session_sub.add_parser(
+        "firewall-plan", help="Show a non-executing fail-closed nftables plan"
+    )
+    firewall_plan.add_argument("session_id", nargs="?", default="demo")
+    firewall_plan.add_argument("--subnet", default="10.203.0.0/30")
+    firewall_plan.add_argument("--trans-port", type=int, default=9040)
+    firewall_plan.add_argument("--dns-port", type=int, default=5353)
+    firewall_plan.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
 
     mac = sub.add_parser("mac", help="NetworkManager MAC privacy")
     mac_sub = mac.add_subparsers(dest="mac_command", required=True)
@@ -287,6 +296,27 @@ def main(argv: list[str] | None = None) -> int:
                 console.print(f"status={plan.reason}")
                 for directive in plan.directives:
                     console.print(f"- {directive}")
+            return 0
+        if args.session_command == "firewall-plan":
+            try:
+                plan = build_firewall_plan(
+                    args.session_id,
+                    subnet=args.subnet,
+                    trans_port=args.trans_port,
+                    dns_port=args.dns_port,
+                )
+            except ValueError as exc:
+                console.print(f"[red]{exc}[/]")
+                return 2
+            if args.json:
+                print(json.dumps(plan.as_dict(), ensure_ascii=False, sort_keys=True))
+            else:
+                console.print(
+                    f"session={plan.session_id} namespace={plan.namespace}"
+                )
+                console.print(f"executable={'yes' if plan.executable else 'no'}")
+                console.print(f"status={plan.reason}")
+                console.print(plan.ruleset, end="")
             return 0
 
     if args.command == "mac":

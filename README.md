@@ -60,6 +60,7 @@ chxsec session tools
 chxsec session plan demo
 chxsec session network-plan demo --subnet 10.203.0.0/30
 chxsec session tor-port-plan 10.203.0.1
+chxsec session firewall-plan demo --subnet 10.203.0.0/30
 ```
 
 Applying a MAC policy modifies the selected NetworkManager connection profile. Add `--reconnect` only when you are prepared for the connection to drop and reconnect.
@@ -86,6 +87,7 @@ verification returns exit code `1`.
 - `session plan` is currently dry-run only; it never creates namespaces or changes firewall rules.
 - `session network-plan` is also planning-only; no veth, route, Tor port or `nftables` rule is applied.
 - `session tor-port-plan` only renders private `TransPort`/`DNSPort` directives; it never writes Tor configuration or restarts the service.
+- `session firewall-plan` renders a fail-closed `nftables` ruleset; it never applies rules to the host.
 - Do not publish terminal screenshots or logs containing SSIDs, usernames, hostnames, home paths, IPs or interface names.
 
 ## Development
