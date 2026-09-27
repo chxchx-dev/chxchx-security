@@ -1,3 +1,31 @@
+╔══════════════════════════════════════════════════════════════════════════════════════════════╗
+║                                                                                              ║
+║   ██████╗██╗  ██╗██╗  ██╗ ██████╗██╗  ██╗██╗  ██╗                                          ║
+║  ██╔════╝██║  ██║╚██╗██╔╝██╔════╝██║  ██║╚██╗██╔╝                                          ║
+║  ██║     ███████║ ╚███╔╝ ██║     ███████║ ╚███╔╝                                           ║
+║  ██║     ██╔══██║ ██╔██╗ ██║     ██╔══██║ ██╔██╗                                           ║
+║  ╚██████╗██║  ██║██╔╝ ██╗╚██████╗██║  ██║██╔╝ ██╗                                          ║
+║   ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝                                          ║
+║                                                                                              ║
+║                ███████╗███████╗ ██████╗██╗   ██╗██████╗ ██╗████████╗██╗   ██╗               ║
+║                ██╔════╝██╔════╝██╔════╝██║   ██║██╔══██╗██║╚══██╔══╝╚██╗ ██╔╝               ║
+║                ███████╗█████╗  ██║     ██║   ██║██████╔╝██║   ██║    ╚████╔╝                ║
+║                ╚════██║██╔══╝  ██║     ██║   ██║██╔══██╗██║   ██║     ╚██╔╝                 ║
+║                ███████║███████╗╚██████╗╚██████╔╝██║  ██║██║   ██║      ██║                  ║
+║                ╚══════╝╚══════╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝   ╚═╝      ╚═╝                  ║
+║                                                                                              ║
+║                               CHXCHX SECURITY                                                ║
+║                                                                                              ║
+║                     ─────────────────────────────────                                        ║
+║                       PRIVACY • SECURITY • CONTROL                                           ║
+║                     ─────────────────────────────────                                        ║
+║                                                                                              ║
+║                              by @chxchx-dev                                                  ║
+║                                                                                              ║
+║                         [ SYSTEM STATUS: SECURED ]                                            ║
+║                                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════════════════════╝
+
 # ChxChx Security v0.1.2
 
 Terminal-first privacy orchestrator for Fedora. It does **not** claim to make a machine invisible or erase forensic evidence. Its purpose is narrower and testable: launch compatible applications through Tor, validate the Tor path, reduce accidental local metadata, and manage NetworkManager MAC privacy settings without putting secrets or machine-specific data in Git.

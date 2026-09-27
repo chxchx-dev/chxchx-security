@@ -30,7 +30,7 @@ from chxchx_security.services.tor import (
     start_service,
     verify,
 )
-from chxchx_security.ui import checks_table, console, header
+from chxchx_security.ui import checks_table, console, header, print_signature
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -135,7 +135,8 @@ def _verification_json(result) -> str:
 
 
 def _interactive(settings: Settings) -> int:
-    header(__version__)
+    print_signature()
+    console.print()
     console.print("[bold]1[/] Doctor / audit")
     console.print("[bold]2[/] Start Tor")
     console.print("[bold]3[/] Verify Tor route")
