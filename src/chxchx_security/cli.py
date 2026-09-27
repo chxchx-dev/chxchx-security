@@ -135,7 +135,7 @@ def _verification_json(result) -> str:
 
 
 def _interactive(settings: Settings) -> int:
-    print_signature()
+    header(__version__)
     console.print()
     console.print("[bold]1[/] Doctor / audit")
     console.print("[bold]2[/] Start Tor")
@@ -338,6 +338,7 @@ def main(argv: list[str] | None = None) -> int:
             return 1
 
     if args.command == "about":
+        print_signature()
         console.print(
             "ChxChx Security reduces accidental network exposure for explicitly protected processes. "
             f"It does not provide invisibility, anti-forensics, or whole-host anonymity in {__version__}."
