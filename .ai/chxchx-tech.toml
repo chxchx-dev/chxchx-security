@@ -1,0 +1,46 @@
+version = 2
+profile = "python"
+memory_project = "chxchx-security-899382"
+memory_path = ".ai/memory"
+
+[workspace]
+name = "chxchx-security"
+adapter = "zellij"
+editor = "sublime"
+auto_open_editor = false
+auto_attach = true
+auto_start = false
+
+[workspace.header]
+enabled = true
+label = "chxchx-tech"
+logo = ""
+template = "{logo} {label} | {project} | {profile}"
+
+[workspace.layout]
+orientation = "horizontal"
+
+[workspace.presets]
+default = ["codex", "claude"]
+
+[workspace.resources]
+warn_memory_percent = 75
+critical_memory_percent = 90
+warn_swap_percent = 40
+
+[workspace.docker]
+enabled = false
+compose_file = "compose.yaml"
+auto_start = false
+
+[[workspace.agents]]
+id = "codex"
+command = ["codex"]
+cwd = "."
+auto_start = false
+
+[[workspace.agents]]
+id = "claude"
+command = ["claude"]
+cwd = "."
+auto_start = false
