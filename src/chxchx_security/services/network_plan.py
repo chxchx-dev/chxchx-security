@@ -151,6 +151,27 @@ def build_network_plan(
             "planned",
         ),
         NetworkStep(
+            "bring up host interface",
+            (*prefix, "ip", "link", "set", host_interface, "up"),
+            "planned",
+        ),
+        NetworkStep(
+            "bring up namespace interface",
+            (
+                *prefix,
+                "ip",
+                "netns",
+                "exec",
+                namespace,
+                "ip",
+                "link",
+                "set",
+                namespace_interface,
+                "up",
+            ),
+            "planned",
+        ),
+        NetworkStep(
             "route namespace traffic through Tor",
             None,
             "blocked_until_tor_ports",

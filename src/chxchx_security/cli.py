@@ -19,7 +19,10 @@ from chxchx_security.services.namespace import (
     build_namespace_plan,
     detect_namespace_tools,
 )
+from chxchx_security.services.namespace_runtime import NamespaceRuntime
 from chxchx_security.services.network_plan import build_network_plan
+from chxchx_security.services.network_runtime import NetworkRuntime
+from chxchx_security.services.session import SessionError
 from chxchx_security.services.firewall_plan import build_firewall_plan
 from chxchx_security.services.tor_ports import build_tor_port_plan
 from chxchx_security.services.tor import (
@@ -69,6 +72,20 @@ def build_parser() -> argparse.ArgumentParser:
     network_plan.add_argument("--trans-port", type=int, default=9040)
     network_plan.add_argument("--dns-port", type=int, default=5353)
     network_plan.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
+    network_apply = session_sub.add_parser(
+        "network-apply",
+        help="Create a namespace and wire its veth pair (privileged; needs --yes)",
+    )
+    network_apply.add_argument("session_id")
+    network_apply.add_argument("--subnet", default="10.203.0.0/30")
+    network_apply.add_argument(
+        "--yes", action="store_true", help="Actually run the privileged commands"
+    )
+    network_apply.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
+    session_destroy = session_sub.add_parser(
+        "destroy", help="Destroy a session namespace and its veth pair (privileged)"
+    )
+    session_destroy.add_argument("session_id")
     tor_port_plan = session_sub.add_parser(
         "tor-port-plan", help="Show a non-executing Tor listener configuration"
     )
@@ -279,6 +296,33 @@ def main(argv: list[str] | None = None) -> int:
                     command = " ".join(step.command) if step.command else "pending"
                     console.print(f"- [{step.status}] {step.name}: {command}")
             return 0
+        if args.session_command == "network-apply":
+            try:
+                result = NetworkRuntime().apply(
+                    args.session_id, subnet=args.subnet, dry_run=not args.yes
+                )
+            except ValueError as exc:
+                console.print(f"[red]{exc}[/]")
+                return 2
+            if args.json:
+                print(json.dumps(result.as_dict(), ensure_ascii=False, sort_keys=True))
+            else:
+                console.print(f"session={result.session_id} namespace={result.namespace}")
+                console.print(f"applied={'yes' if result.applied else 'no'}")
+                console.print(f"status={result.detail}")
+                for command in result.commands:
+                    console.print(f"- {' '.join(command)}", markup=False)
+                if not args.yes:
+                    console.print("Re-run with --yes to execute these commands.")
+            return 0 if result.ok else 1
+        if args.session_command == "destroy":
+            try:
+                result = NamespaceRuntime().destroy(args.session_id)
+            except SessionError as exc:
+                console.print(f"[red]{exc}[/]")
+                return 2
+            console.print(f"namespace={result.namespace} status={result.detail}")
+            return 0 if result.ok else 1
         if args.session_command == "tor-port-plan":
             try:
                 plan = build_tor_port_plan(

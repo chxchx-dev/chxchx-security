@@ -109,3 +109,15 @@ def test_session_firewall_plan_is_explicitly_non_executing(capsys):
     assert payload["nat_table"] == "chxsec_nat_2a97516c"
     assert payload["executable"] is False
     assert "policy drop" in payload["ruleset"]
+
+
+def test_session_network_apply_without_yes_is_dry_run(capsys):
+    assert cli.main(["session", "network-apply", "demo", "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+
+    assert payload["applied"] is False
+    assert payload["commands"][0][-3:] == ["netns", "add", "chxsec-demo"]
+
+
+def test_session_network_apply_rejects_bad_session_id(capsys):
+    assert cli.main(["session", "network-apply", "Bad_ID"]) == 2

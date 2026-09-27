@@ -78,6 +78,9 @@ chxsec session plan demo
 chxsec session network-plan demo --subnet 10.203.0.0/30
 chxsec session tor-port-plan 10.203.0.1
 chxsec session firewall-plan demo --subnet 10.203.0.0/30
+chxsec session network-apply demo --subnet 10.203.0.0/30        # dry-run
+chxsec session network-apply demo --subnet 10.203.0.0/30 --yes  # privileged
+chxsec session destroy demo
 ```
 
 Applying a MAC policy modifies the selected NetworkManager connection profile. Add `--reconnect` only when you are prepared for the connection to drop and reconnect.
@@ -102,7 +105,7 @@ verification returns exit code `1`.
 - The project reduces exposure for explicitly protected compatible TCP processes; it is not a whole-host anonymity system.
 - The project does not erase system logs, audit records or third-party history.
 - `session plan` is currently dry-run only; it never creates namespaces or changes firewall rules.
-- `session network-plan` is also planning-only; no veth, route, Tor port or `nftables` rule is applied.
+- `session network-plan` is planning-only. `session network-apply --yes` is the first privileged command: it creates the namespace and a veth pair with addresses, installs no route and no firewall rules, and rolls everything back on failure. Without `--yes` it only prints the commands. `session destroy` removes the namespace and veth.
 - `session tor-port-plan` only renders private `TransPort`/`DNSPort` directives; it never writes Tor configuration or restarts the service.
 - `session firewall-plan` renders a fail-closed `nftables` ruleset; it never applies rules to the host.
 - Do not publish terminal screenshots or logs containing SSIDs, usernames, hostnames, home paths, IPs or interface names.
