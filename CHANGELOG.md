@@ -2,7 +2,8 @@
 
 ## 0.2.0 - 2026-09-27
 
-- Added a remote Fedora bootstrap installer and README download links. It saves source locally under `~/.local/share/chxchx-security` by default and delegates to the existing installer without Docker or mounted volumes.
+- Added remote Fedora and APT bootstrap installers with visible, bounded downloads; the APT installer supports Ubuntu 24.04+ and Kali Linux. Both install locally under `~/.local/share/chxchx-security` by default without Docker or mounted volumes.
+- Updated README installer links and commands to download scripts to a local file before running them, so interactive confirmation and `sudo` retain terminal input.
 - Hardened opt-in namespace/firewall integration tests to use unique IDs and clean up only resources created by that test; added an offline archive/bootstrap test and CI wheel/sdist build smoke checks.
 - Fixed network setup rollback so a failed `ip link add` does not delete a pre-existing host interface whose name collides with the requested session.
 - Fixed `session tor-port-apply`: on SELinux-enforcing systems, Tor could not bind a non-default TransPort/DNSPort address (`Permission denied`), and because tor.service restarts on failure, this crash-looped the live Tor service until the bad drop-in was removed. `tor-port-apply` now registers the configured ports as `tor_port_t` via `semanage port` first (refusing cleanly if a port is already labeled for something else) and deregisters them on removal; `install-fedora.sh` now installs `policycoreutils-python-utils`, `iproute` and `nftables`.

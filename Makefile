@@ -10,7 +10,7 @@ test:
 	.venv/bin/pytest
 
 check: test
-	bash -n install-fedora.sh install-remote-fedora.sh
+	bash -n install-fedora.sh install-remote-fedora.sh install-debian.sh install-remote-debian.sh
 
 package:
 	.venv/bin/python -m build --sdist --wheel

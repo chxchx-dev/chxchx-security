@@ -40,7 +40,7 @@ jobs:
           (cd "$RUNNER_TEMP" && PYTHONPATH="$wheel_dir" python -m chxchx_security --help)
 
       - name: Validate installer syntax
-        run: bash -n install-fedora.sh install-remote-fedora.sh
+        run: bash -n install-fedora.sh install-remote-fedora.sh install-debian.sh install-remote-debian.sh
 
       - name: Compile Python sources
         run: python -m compileall -q src

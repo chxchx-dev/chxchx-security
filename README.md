@@ -17,7 +17,7 @@
 
 # ChxChx Security v0.2.0
 
-Herramienta de privacidad y seguridad para la terminal de Fedora. Permite ejecutar programas compatibles a través de Tor, comprobar la conexión Tor, reducir metadatos locales accidentales y administrar opciones de privacidad MAC de NetworkManager.
+Herramienta de privacidad y seguridad para la terminal de Fedora, Ubuntu y Kali Linux. Permite ejecutar programas compatibles a través de Tor, comprobar la conexión Tor, reducir metadatos locales accidentales y administrar opciones de privacidad MAC de NetworkManager.
 
 No promete volver invisible el equipo ni borrar rastros forenses. Solo protege los procesos que el usuario ejecuta explícitamente con la herramienta y dentro de los límites descritos más abajo.
 
@@ -39,64 +39,79 @@ ChxChx Security puede reducir la exposición de la IP pública para aplicaciones
 
 Para navegar de forma anónima, usa Tor Browser. Un navegador normal no se vuelve anónimo solo por usar un proxy.
 
-## Instalación en Fedora
+## Instalación
 
-### Descargar e instalar desde GitHub
+Los instaladores preparan un entorno Python local en `~/.local/share/chxchx-security` cuando se descargan desde GitHub. No usan Docker, contenedores ni volúmenes montados. Piden confirmación antes de instalar paquetes del sistema; `sudo` puede pedir la contraseña.
 
-En Fedora puedes instalar con un solo comando o descargar el instalador para revisarlo antes de ejecutarlo:
+### Fedora
 
-[Descargar instalador para Fedora](https://raw.githubusercontent.com/chxchx-dev/chxchx-security/dev/install-remote-fedora.sh) · [Descargar el código fuente](https://github.com/chxchx-dev/chxchx-security/archive/refs/heads/dev.tar.gz)
+[Descargar instalador para Fedora](https://github.com/chxchx-dev/chxchx-security/raw/refs/heads/dev/install-remote-fedora.sh?download=1) · [Descargar código fuente `.tar.gz`](https://github.com/chxchx-dev/chxchx-security/archive/refs/heads/dev.tar.gz)
 
-Instalación rápida (descarga y ejecuta el instalador):
-
-```bash
-curl --fail --location https://raw.githubusercontent.com/chxchx-dev/chxchx-security/dev/install-remote-fedora.sh | bash
-```
-
-Para descargarlo, revisarlo y ejecutarlo manualmente:
+En la terminal de Fedora, descarga y ejecuta el instalador en dos pasos:
 
 ```bash
-curl --fail --location --output install-chxsec.sh https://raw.githubusercontent.com/chxchx-dev/chxchx-security/dev/install-remote-fedora.sh
-less install-chxsec.sh
-bash install-chxsec.sh
+curl --fail --location --show-error --retry 3 --connect-timeout 20 --max-time 120 \
+  --output install-chxsec-fedora.sh \
+  https://raw.githubusercontent.com/chxchx-dev/chxchx-security/dev/install-remote-fedora.sh
+bash install-chxsec-fedora.sh
 ```
 
-El instalador descarga el código a `~/.local/share/chxchx-security`, instala los paquetes necesarios de Fedora y prepara un entorno Python local (`.venv`). No utiliza Docker, contenedores ni volúmenes montados. Antes de instalar paquetes del sistema, solicita confirmación; `sudo` puede pedir la contraseña del usuario. Para aceptar la instalación de paquetes sin esa pregunta, ejecuta:
+El instalador muestra el progreso de descarga, usa un tiempo máximo y luego descarga el código fuente y prepara el entorno. Ejecutarlo desde un archivo permite que la pregunta de confirmación y `sudo` lean desde la terminal; no lo canalices con `curl | bash`. Para aceptar la instalación de paquetes sin confirmación, añade `--yes`:
 
 ```bash
-bash install-chxsec.sh --yes
+bash install-chxsec-fedora.sh --yes
 ```
 
-Al terminar, activa el entorno y comprueba que la herramienta quedó instalada:
+### Ubuntu y Kali Linux
+
+Ubuntu 24.04 o posterior y Kali Linux actual comparten APT y requieren Python 3.11 o posterior, así que usan el mismo instalador:
+
+[Descargar instalador para Ubuntu](https://github.com/chxchx-dev/chxchx-security/raw/refs/heads/dev/install-remote-debian.sh?download=1) · [Descargar instalador para Kali Linux](https://github.com/chxchx-dev/chxchx-security/raw/refs/heads/dev/install-remote-debian.sh?download=1) · [Descargar código fuente `.tar.gz`](https://github.com/chxchx-dev/chxchx-security/archive/refs/heads/dev.tar.gz)
+
+Descárgalo y ejecútalo desde una terminal de Ubuntu o Kali:
+
+```bash
+curl --fail --location --show-error --retry 3 --connect-timeout 20 --max-time 120 \
+  --output install-chxsec-debian.sh \
+  https://raw.githubusercontent.com/chxchx-dev/chxchx-security/dev/install-remote-debian.sh
+bash install-chxsec-debian.sh
+```
+
+Este instalador detecta Ubuntu o Kali, muestra el progreso al descargar y prepara Python, Tor, torsocks, NetworkManager, iproute2 y nftables con APT. También instala el proyecto en un `.venv` local. Para saltar la confirmación de paquetes, usa:
+
+```bash
+bash install-chxsec-debian.sh --yes
+```
+
+Cuando termine cualquiera de los instaladores, activa el entorno:
 
 ```bash
 source ~/.local/share/chxchx-security/.venv/bin/activate
 chxsec doctor
+chxsec tor verify
 ```
 
-El enlace de descarga usa la rama `dev`. Para usar otro archivo de código fuente, configura `CHXSEC_SOURCE_ARCHIVE_URL`; para elegir otra carpeta de instalación, configura `CHXSEC_INSTALL_DIR`.
+Los enlaces directos apuntan a la rama `dev`. Puedes usar otro archivo fuente con `CHXSEC_SOURCE_ARCHIVE_URL` o elegir otra carpeta con `CHXSEC_INSTALL_DIR`.
 
 ### Instalar desde una copia local
 
-Si ya descargaste o clonaste el repositorio:
+Desde un checkout de Fedora:
 
 ```bash
 ./install-fedora.sh --yes
 source .venv/bin/activate
 chxsec doctor
-chxsec tor verify
 ```
 
-`install-fedora.sh` instala paquetes de Fedora, crea el entorno `.venv` e instala el proyecto. Tor se obtiene de los paquetes de Fedora o de Tor Project; el repositorio no incluye Tor. El instalador no inicia ni habilita Tor a menos que se solicite expresamente:
+Desde un checkout de Ubuntu o Kali:
 
 ```bash
-./install-fedora.sh --yes --start-tor
-./install-fedora.sh --yes --enable-tor
+./install-debian.sh --yes
+source .venv/bin/activate
+chxsec doctor
 ```
 
-Consulta las opciones con `./install-fedora.sh --help`. Usa `--dry-run` para revisar las acciones previstas sin cambiar el sistema.
-
-La configuración es opcional. Puedes definir ajustes locales en `.env` o en variables de entorno `CHXSEC_*`. No subas archivos `.env` al repositorio.
+Usa `--dry-run` para revisar las acciones previstas sin cambiar el sistema. El instalador no inicia ni habilita Tor salvo que se pida expresamente con `--start-tor` o `--enable-tor`. La configuración es opcional: los ajustes pueden ir en `.env` o en variables `CHXSEC_*`; no subas archivos `.env` al repositorio.
 
 ## Ejemplos
 

@@ -16,7 +16,7 @@ class Check:
     detail: str
 
 
-def _fedora_release() -> str:
+def _os_release_data() -> dict[str, str]:
     try:
         data = {}
         with open("/etc/os-release", "r", encoding="utf-8") as handle:
@@ -24,9 +24,25 @@ def _fedora_release() -> str:
                 if "=" in line:
                     key, val = line.rstrip().split("=", 1)
                     data[key] = val.strip('"')
-        return f"{data.get('NAME', 'Linux')} {data.get('VERSION_ID', '')}".strip()
     except OSError:
-        return platform.system()
+        return {"NAME": platform.system()}
+    return data
+
+
+def _os_check() -> Check:
+    release = _os_release_data()
+    distro_id = release.get("ID", "").lower()
+    package_manager = {
+        "fedora": "dnf",
+        "ubuntu": "apt-get",
+        "kali": "apt-get",
+    }.get(distro_id)
+    supported = platform.system() == "Linux" and package_manager is not None and exists(package_manager)
+    version = release.get("VERSION_ID", "")
+    detail = f"{release.get('NAME', 'Linux')} {version}".strip()
+    if not supported:
+        detail = f"unsupported or missing package manager: {detail}"
+    return Check("OS", supported, detail)
 
 
 def _clock_check() -> Check:
@@ -55,7 +71,7 @@ def _session_dropin_check() -> Check:
 def doctor(settings: Settings) -> list[Check]:
     tor_state = service_state()
     checks = [
-        Check("OS", exists("dnf"), _fedora_release()),
+        _os_check(),
         Check("Tor binary", exists("tor"), "installed" if exists("tor") else "missing"),
         Check("torsocks", exists("torsocks"), "installed" if exists("torsocks") else "missing"),
         Check("curl", exists("curl"), "installed" if exists("curl") else "missing"),
