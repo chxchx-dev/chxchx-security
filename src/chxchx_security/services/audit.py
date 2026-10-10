@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import glob
 import platform
 from dataclasses import dataclass
 
@@ -39,6 +40,18 @@ def _clock_check() -> Check:
     return Check("System clock", False, "not synchronized")
 
 
+def _session_dropin_check() -> Check:
+    stale = sorted(glob.glob("/etc/tor/torrc.d/chxsec-*.conf"))
+    if not stale:
+        return Check("Session Tor drop-ins", True, "none")
+    return Check(
+        "Session Tor drop-ins",
+        False,
+        f"{len(stale)} present; if no session is active, run `chxsec session destroy <id>` "
+        "(a stale drop-in can stop Tor from starting after a reboot)",
+    )
+
+
 def doctor(settings: Settings) -> list[Check]:
     tor_state = service_state()
     checks = [
@@ -50,6 +63,7 @@ def doctor(settings: Settings) -> list[Check]:
         Check("Tor service", tor_state == "active", tor_state),
         Check("Tor SOCKS", socks_reachable(settings), f"{settings.tor_socks_host}:{settings.tor_socks_port}"),
         _clock_check(),
+        _session_dropin_check(),
     ]
     if exists("firewall-cmd"):
         state = run(["firewall-cmd", "--state"], timeout=5)

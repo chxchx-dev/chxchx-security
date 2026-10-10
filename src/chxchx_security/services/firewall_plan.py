@@ -53,6 +53,7 @@ def _ruleset(
     filter_table: str,
     nat_table: str,
     host_interface: str,
+    host_ip: str,
     namespace_address: str,
     trans_port: int,
     dns_port: int,
@@ -60,6 +61,7 @@ def _ruleset(
     return f'''table inet {filter_table} {{
     chain input {{
         type filter hook input priority -10; policy accept;
+        ip daddr {host_ip} iifname != "{host_interface}" drop
         iifname "{host_interface}" ip saddr {namespace_address} tcp dport {trans_port} accept
         iifname "{host_interface}" ip saddr {namespace_address} udp dport {dns_port} accept
         iifname "{host_interface}" drop
@@ -67,8 +69,8 @@ def _ruleset(
 
     chain forward {{
         type filter hook forward priority -10; policy accept;
-        iifname "{host_interface}" drop
-        oifname "{host_interface}" drop
+        iifname "{host_interface}" counter drop
+        oifname "{host_interface}" counter drop
     }}
 
     chain output {{
@@ -92,7 +94,7 @@ def build_firewall_plan(
     *,
     subnet: str,
     trans_port: int = 9040,
-    dns_port: int = 5353,
+    dns_port: int = 5300,
 ) -> FirewallPlan:
     network = build_network_plan(
         session_id,
@@ -110,6 +112,7 @@ def build_firewall_plan(
         filter_table=filter_table,
         nat_table=nat_table,
         host_interface=network.host_interface,
+        host_ip=network.host_address.split("/", 1)[0],
         namespace_address=network.namespace_address.split("/", 1)[0],
         trans_port=tor.trans_port,
         dns_port=tor.dns_port,

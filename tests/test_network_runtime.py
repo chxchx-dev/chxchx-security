@@ -9,7 +9,8 @@ def _runtime(calls, fail_at=None):
     def runner(command):
         calls.append(tuple(command))
         if fail_at is not None and len(calls) == fail_at:
-            return CmdResult(False, 1, "", "boom")
+            stderr = "File exists" if fail_at == 3 else "boom"
+            return CmdResult(False, 1, "", stderr)
         return CmdResult(True, 0, "", "")
 
     return NetworkRuntime(runner=runner, privileged_prefix=("sudo",))
@@ -38,15 +39,19 @@ def test_apply_wires_veth_and_installs_no_route():
 
 
 @pytest.mark.parametrize("fail_at", [3, 5, 8])
-def test_failure_rolls_back_veth_and_namespace(fail_at):
+def test_failure_rolls_back_only_resources_created_by_this_attempt(fail_at):
     calls = []
     result = _runtime(calls, fail_at=fail_at).apply("demo", subnet="10.203.0.0/30")
 
     assert result.ok is False
     assert result.applied is False
     assert "rollback completed" in result.detail
-    assert calls[-2][:4] == ("sudo", "ip", "link", "delete")
-    assert calls[-1] == ("sudo", "ip", "netns", "delete", "chxsec-demo")
+    if fail_at == 3:
+        assert not any(command[:4] == ("sudo", "ip", "link", "delete") for command in calls)
+        assert calls[-1] == ("sudo", "ip", "netns", "delete", "chxsec-demo")
+    else:
+        assert calls[-2][:4] == ("sudo", "ip", "link", "delete")
+        assert calls[-1] == ("sudo", "ip", "netns", "delete", "chxsec-demo")
 
 
 def test_namespace_creation_failure_skips_wiring():

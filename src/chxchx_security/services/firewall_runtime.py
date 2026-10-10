@@ -86,7 +86,7 @@ class FirewallRuntime:
         *,
         subnet: str,
         trans_port: int = 9040,
-        dns_port: int = 5353,
+        dns_port: int = 5300,
         dry_run: bool = False,
     ) -> FirewallResult:
         plan = build_firewall_plan(

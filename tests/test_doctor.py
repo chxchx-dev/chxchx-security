@@ -21,6 +21,7 @@ def test_doctor_reports_required_dependencies(monkeypatch):
     monkeypatch.setattr(audit, "service_state", lambda: "active")
     monkeypatch.setattr(audit, "socks_reachable", lambda _settings: True)
     monkeypatch.setattr(audit, "run", lambda *_args, **_kwargs: CmdResult(True, 0, "yes", ""))
+    monkeypatch.setattr(audit.glob, "glob", lambda _pattern: [])
 
     checks = audit.doctor(settings())
 
@@ -35,4 +36,16 @@ def test_doctor_reports_required_dependencies(monkeypatch):
         "Tor service",
         "Tor SOCKS",
         "System clock",
+        "Session Tor drop-ins",
     }
+
+
+def test_doctor_flags_stale_session_dropins(monkeypatch):
+    monkeypatch.setattr(
+        audit.glob, "glob", lambda _pattern: ["/etc/tor/torrc.d/chxsec-demo.conf"]
+    )
+
+    check = audit._session_dropin_check()
+
+    assert check.ok is False
+    assert "session destroy" in check.detail

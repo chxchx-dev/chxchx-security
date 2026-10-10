@@ -86,7 +86,7 @@ def build_network_plan(
     *,
     subnet: str,
     trans_port: int = 9040,
-    dns_port: int = 5353,
+    dns_port: int = 5300,
 ) -> NetworkPlan:
     validate_session_id(session_id)
     network = _subnet(subnet)

@@ -53,10 +53,14 @@ class NetworkRuntime:
         ]
         return tuple((*self._prefix, *command[1:]) for command in steps)
 
-    def _rollback(self, plan: NetworkPlan) -> bool:
-        veth = self._runner((*self._prefix, "ip", "link", "delete", plan.host_interface))
+    def _rollback(self, plan: NetworkPlan, *, remove_veth: bool) -> bool:
+        if remove_veth:
+            veth = self._runner((*self._prefix, "ip", "link", "delete", plan.host_interface))
+            veth_ok = veth.ok or "Cannot find device" in veth.stderr
+        else:
+            veth_ok = True
         namespace = self._namespaces.destroy(plan.session_id)
-        return namespace.ok and (veth.ok or "Cannot find device" in veth.stderr)
+        return namespace.ok and veth_ok
 
     def apply(
         self,
@@ -64,7 +68,7 @@ class NetworkRuntime:
         *,
         subnet: str,
         trans_port: int = 9040,
-        dns_port: int = 5353,
+        dns_port: int = 5300,
         dry_run: bool = False,
     ) -> NetworkApplyResult:
         plan = build_network_plan(
@@ -88,10 +92,11 @@ class NetworkRuntime:
             )
 
         executed = list(created.commands)
-        for command in commands:
+        veth_created = False
+        for index, command in enumerate(commands):
             executed.append(command)
             if not self._runner(command).ok:
-                rolled_back = self._rollback(plan)
+                rolled_back = self._rollback(plan, remove_veth=veth_created)
                 state = "rollback completed" if rolled_back else "rollback FAILED; clean up manually"
                 return NetworkApplyResult(
                     False,
@@ -101,6 +106,8 @@ class NetworkRuntime:
                     f"network wiring failed; {state}",
                     tuple(executed),
                 )
+            if index == 0:
+                veth_created = True
 
         return NetworkApplyResult(
             True,
